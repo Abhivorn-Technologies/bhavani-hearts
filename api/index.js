@@ -1,7 +1,9 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs/promises';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distDir = path.join(__dirname, '../dist');
 
 let cachedServer = null;
 
@@ -20,8 +22,58 @@ async function loadServer() {
   }
 }
 
+async function serveStaticFile(pathname) {
+  // Check if it's a static asset file
+  if (pathname.startsWith('/assets/')) {
+    try {
+      const filePath = path.join(distDir, pathname);
+      // Prevent directory traversal
+      if (!filePath.startsWith(distDir)) {
+        return null;
+      }
+      const content = await fs.readFile(filePath);
+      const ext = path.extname(pathname).toLowerCase();
+      const mimeTypes = {
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.webp': 'image/webp',
+        '.woff': 'font/woff',
+        '.woff2': 'font/woff2',
+        '.ttf': 'font/ttf',
+      };
+      return {
+        status: 200,
+        content,
+        contentType: mimeTypes[ext] || 'application/octet-stream',
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+  return null;
+}
+
 export default async (req, res) => {
   try {
+    const url = new URL(req.url || '/', `http://${req.headers.host}`);
+    const pathname = url.pathname;
+
+    // Try to serve static files first
+    const staticFile = await serveStaticFile(pathname);
+    if (staticFile) {
+      res.statusCode = staticFile.status;
+      res.setHeader('Content-Type', staticFile.contentType);
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.end(staticFile.content);
+      return;
+    }
+
+    // Fall through to SSR server for dynamic routes
     const server = await loadServer();
 
     if (!server || typeof server.fetch !== 'function') {
@@ -35,7 +87,7 @@ export default async (req, res) => {
     // Build the full URL
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.headers['x-forwarded-host'] || req.headers.host;
-    const url = `${protocol}://${host}${req.url}`;
+    const fullUrl = `${protocol}://${host}${req.url}`;
 
     // Convert Node.js request to Fetch API Request
     let body;
@@ -43,7 +95,7 @@ export default async (req, res) => {
       body = req;
     }
 
-    const fetchRequest = new Request(url, {
+    const fetchRequest = new Request(fullUrl, {
       method: req.method,
       headers: req.headers,
       body: body,

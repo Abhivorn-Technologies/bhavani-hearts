@@ -1,6 +1,5 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/client",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
@@ -14,18 +13,10 @@
       ]
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/favicon\\.(ico|png|jpg|jpeg)",
-      "dest": "/api/favicon"
-    },
-    {
-      "src": "/assets/:path*",
-      "dest": "/assets/:path*"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api"
+      "source": "/(.*)",
+      "destination": "/api"
     }
   ],
   "functions": {
