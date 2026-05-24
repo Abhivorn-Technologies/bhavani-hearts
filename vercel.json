@@ -17,7 +17,13 @@
   "routes": [
     {
       "src": "/favicon\\.(ico|png|jpg|jpeg)",
-      "dest": "/api/favicon"
+      "dest": "/api/favicon",
+      "continue": false
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1",
+      "continue": false
     },
     {
       "src": "/(.*)",
