@@ -14,20 +14,28 @@
       ]
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/assets/:path*",
-      "destination": "/assets/:path*"
+      "src": "/favicon\\.(ico|png|jpg|jpeg)",
+      "dest": "/api/favicon"
     },
     {
-      "source": "/:path*",
-      "destination": "/api"
+      "src": "/assets/:path*",
+      "dest": "/assets/:path*"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api"
     }
   ],
   "functions": {
     "api/index.js": {
       "memory": 1024,
       "maxDuration": 60
+    },
+    "api/favicon.js": {
+      "memory": 128,
+      "maxDuration": 10
     }
   }
 }

@@ -2,44 +2,72 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-let serverModule = null;
 
-async function getServer() {
-  if (!serverModule) {
-    const { default: server } = await import('../dist/server/server.js');
-    serverModule = server;
+let cachedServer = null;
+
+async function loadServer() {
+  if (cachedServer) {
+    return cachedServer;
   }
-  return serverModule;
+
+  try {
+    const serverModule = await import('../dist/server/server.js');
+    cachedServer = serverModule.default || serverModule;
+    return cachedServer;
+  } catch (error) {
+    console.error('Failed to load server module:', error);
+    throw error;
+  }
 }
 
 export default async (req, res) => {
   try {
-    const server = await getServer();
-    
-    // Create a Request object compatible with the server
-    const url = new URL(req.url || '/', `http://${req.headers.host}`);
-    const request = new Request(url.toString(), {
+    const server = await loadServer();
+
+    if (!server || typeof server.fetch !== 'function') {
+      console.error('Server fetch handler not found');
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'text/html');
+      res.end('<h1>500 - Server Not Initialized</h1>');
+      return;
+    }
+
+    // Build the full URL
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const url = `${protocol}://${host}${req.url}`;
+
+    // Convert Node.js request to Fetch API Request
+    let body;
+    if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+      body = req;
+    }
+
+    const fetchRequest = new Request(url, {
       method: req.method,
-      headers: new Headers(req.headers),
-      body: ['GET', 'HEAD'].includes(req.method) ? undefined : req,
+      headers: req.headers,
+      body: body,
     });
 
-    // Call the server's fetch handler
-    const response = await server.fetch(request, {}, {});
+    // Call the server handler
+    const response = await server.fetch(fetchRequest, {}, {});
 
-    // Set response headers
+    // Set response status and headers
+    res.statusCode = response.status;
+    
     response.headers.forEach((value, name) => {
       res.setHeader(name, value);
     });
 
-    res.statusCode = response.status;
-    const body = await response.text();
-    res.end(body);
+    // Send response body
+    const text = await response.text();
+    res.end(text);
   } catch (error) {
     console.error('Server error:', error);
     res.statusCode = 500;
     res.setHeader('Content-Type', 'text/html');
-    res.end('<h1>500 Internal Server Error</h1>');
+    res.end('<h1>500 - Internal Server Error</h1><pre>' + error.message + '</pre>');
   }
 };
+
 
