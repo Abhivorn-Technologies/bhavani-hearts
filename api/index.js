@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, '../dist');
+const clientDir = path.join(__dirname, '../dist/client');
 
 let cachedServer = null;
 
@@ -26,12 +27,23 @@ async function serveStaticFile(pathname) {
   // Check if it's a static asset file
   if (pathname.startsWith('/assets/')) {
     try {
-      const filePath = path.join(distDir, pathname);
+      // Try to find the file in dist/client/assets first
+      let filePath = path.join(clientDir, pathname);
+      let content;
+      
+      try {
+        content = await fs.readFile(filePath);
+      } catch {
+        // Fall back to dist/assets if not found in client
+        filePath = path.join(distDir, pathname);
+        content = await fs.readFile(filePath);
+      }
+      
       // Prevent directory traversal
       if (!filePath.startsWith(distDir)) {
         return null;
       }
-      const content = await fs.readFile(filePath);
+      
       const ext = path.extname(pathname).toLowerCase();
       const mimeTypes = {
         '.js': 'application/javascript',
@@ -52,6 +64,7 @@ async function serveStaticFile(pathname) {
         contentType: mimeTypes[ext] || 'application/octet-stream',
       };
     } catch (error) {
+      console.error(`Static file not found: ${pathname}`, error.message);
       return null;
     }
   }
