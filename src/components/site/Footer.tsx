@@ -37,9 +37,9 @@ export function Footer() {
               <li>@bhavani_foundation</li>
             </ul>
             <div className="mt-4 flex gap-3">
-              <a href="https://instagram.com/bhavani_foundation" className="w-9 h-9 rounded-full glass flex items-center justify-center text-gold hover:bg-gold hover:text-navy-deep transition"><FaInstagram /></a>
+              <a href="https://instagram.com/bhavani_foundation" target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full glass flex items-center justify-center text-gold hover:bg-gold hover:text-navy-deep transition"><FaInstagram /></a>
               <a href="tel:9346691958" className="w-9 h-9 rounded-full glass flex items-center justify-center text-gold hover:bg-gold hover:text-navy-deep transition"><FaPhoneAlt /></a>
-              <a href="https://wa.me/919346691958" className="w-9 h-9 rounded-full glass flex items-center justify-center text-gold hover:bg-gold hover:text-navy-deep transition"><FaWhatsapp /></a>
+              <a href="https://wa.me/919346691958" target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full glass flex items-center justify-center text-gold hover:bg-gold hover:text-navy-deep transition"><FaWhatsapp /></a>
             </div>
           </div>
         </div>

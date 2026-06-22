@@ -38,7 +38,8 @@
     },
     "api/favicon.js": {
       "memory": 128,
-      "maxDuration": 10
+      "maxDuration": 10,
+      "includeFiles": "api/favicon.png"
     }
   }
 }
