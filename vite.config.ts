@@ -12,7 +12,9 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
-  ssr: {
-    target: "node",
+  vite: {
+    ssr: {
+      target: "node",
+    },
   },
 });
