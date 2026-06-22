@@ -171,4 +171,18 @@
       radial-gradient(circle at 80% 70%, oklch(0.65 0.24 0 / 0.06) 0 1px, transparent 2px);
     background-size: 60px 60px, 80px 80px;
   }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 35s linear infinite;
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
 }
+

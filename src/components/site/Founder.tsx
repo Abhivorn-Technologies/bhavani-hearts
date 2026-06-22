@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import founder from "@/assets/founder.jpg";
+import founder from "@/assets/founder_img.jpeg";
 import { FaInstagram, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 
 export function Founder() {

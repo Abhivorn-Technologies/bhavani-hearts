@@ -1,28 +1,20 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaPlay, FaTimes } from "react-icons/fa";
-import g1 from "@/assets/g1.jpg";
-import g2 from "@/assets/g2.jpg";
-import g3 from "@/assets/g3.jpg";
-import g4 from "@/assets/g4.jpg";
-import g5 from "@/assets/g5.jpg";
-import g6 from "@/assets/g6.jpg";
+import v1 from "@/assets/WhatsApp Video 2026-06-22 at 8.50.40 PM.mp4";
+import v2 from "@/assets/WhatsApp Video 2026-06-22 at 8.50.42 PM.mp4";
+import v3 from "@/assets/WhatsApp Video 2026-06-22 at 8.50.46 PM.mp4";
+import v4 from "@/assets/WhatsApp Video 2026-06-22 at 8.50.47 PM.mp4";
 
-const photos = [g1, g3, g2, g4, g5, g6];
-const events = [g6, g4, g2, g1];
 const videos = [
-  { thumb: g3, title: "Annadanam Drive 2024" },
-  { thumb: g4, title: "Festival Distribution" },
-  { thumb: g1, title: "Community Feeding" },
+  { url: v1, title: "Community Food Serving Drive" },
+  { url: v2, title: "Annadanam Meal Distribution" },
+  { url: v3, title: "Food Preparation & Packaging" },
+  { url: v4, title: "Serving Needy People" },
 ];
 
-type Tab = "photos" | "videos" | "events";
-
 export function Gallery() {
-  const [tab, setTab] = useState<Tab>("photos");
   const [lightbox, setLightbox] = useState<string | null>(null);
-
-  const tabs: Tab[] = ["photos", "videos", "events"];
 
   return (
     <section id="gallery" className="relative py-28 bg-navy-deep/40">
@@ -32,79 +24,33 @@ export function Gallery() {
           <h2 className="mt-4 text-4xl md:text-5xl font-display">
             Moments of <span className="text-gradient-gold italic">Kindness</span>
           </h2>
+          <p className="mt-4 text-cream/70 max-w-2xl mx-auto text-sm md:text-base">
+            Watch real moments from our recent food distribution and community service activities.
+          </p>
         </div>
 
-        <div className="mt-10 flex justify-center gap-2 flex-wrap">
-          {tabs.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-6 py-2.5 rounded-full text-sm uppercase tracking-widest transition ${
-                tab === t ? "btn-gold" : "glass text-cream/80 hover:text-gold"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
+        {/* Horizontal Scrolling Video Marquee */}
+        <div className="relative mt-16 w-full overflow-hidden py-4">
+          {/* Gradient shadows on sides for a premium fading effect */}
+          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-navy-deep to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-navy-deep to-transparent z-10 pointer-events-none" />
+          
+          <div className="animate-marquee flex gap-8">
+            {/* Render duplicated set of videos for seamless horizontal looping */}
+            {[...videos, ...videos, ...videos, ...videos].map((v, i) => (
+              <VideoCard
+                key={`${v.url}-${i}`}
+                url={v.url}
+                title={v.title}
+                index={i % videos.length}
+                onClick={() => setLightbox(v.url)}
+              />
+            ))}
+          </div>
         </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={tab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.4 }}
-            className="mt-12"
-          >
-            {tab === "photos" && (
-              <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
-                {photos.map((p, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setLightbox(p)}
-                    className="block w-full overflow-hidden rounded-2xl group relative"
-                  >
-                    <img src={p} alt="" loading="lazy" className="w-full group-hover:scale-110 transition duration-700" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 to-transparent opacity-0 group-hover:opacity-100 transition" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {tab === "videos" && (
-              <div className="grid md:grid-cols-3 gap-6">
-                {videos.map((v, i) => (
-                  <div key={i} className="relative rounded-2xl overflow-hidden group cursor-pointer">
-                    <img src={v.thumb} alt={v.title} loading="lazy" className="w-full h-72 object-cover group-hover:scale-110 transition duration-700" />
-                    <div className="absolute inset-0 bg-navy-deep/60 flex items-center justify-center">
-                      <div className="w-16 h-16 rounded-full btn-gold flex items-center justify-center animate-pulse-glow">
-                        <FaPlay className="ml-1" />
-                      </div>
-                    </div>
-                    <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-navy-deep to-transparent">
-                      <p className="font-display text-lg text-cream">{v.title}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {tab === "events" && (
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {events.map((p, i) => (
-                  <button key={i} onClick={() => setLightbox(p)} className="relative rounded-2xl overflow-hidden group">
-                    <img src={p} alt="" loading="lazy" className="w-full h-64 object-cover group-hover:scale-110 transition duration-700" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-transparent to-transparent" />
-                    <p className="absolute bottom-3 left-4 font-display text-cream">Event {i + 1}</p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
       </div>
 
+      {/* Lightbox for playing videos */}
       <AnimatePresence>
         {lightbox && (
           <motion.div
@@ -114,17 +60,72 @@ export function Gallery() {
             className="fixed inset-0 z-[100] bg-navy-deep/95 backdrop-blur-xl flex items-center justify-center p-6"
             onClick={() => setLightbox(null)}
           >
-            <button className="absolute top-6 right-6 text-gold text-2xl"><FaTimes /></button>
-            <motion.img
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              src={lightbox}
-              alt=""
-              className="max-h-[85vh] rounded-2xl ring-1 ring-gold/30"
-            />
+            <button 
+              className="absolute top-6 right-6 text-gold text-2xl hover:scale-110 transition"
+              onClick={() => setLightbox(null)}
+            >
+              <FaTimes />
+            </button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-full max-w-3xl aspect-[9/16] md:aspect-video rounded-3xl overflow-hidden ring-2 ring-gold/30 bg-black/60 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <video
+                src={lightbox}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
     </section>
+  );
+}
+
+function VideoCard({ url, title, index, onClick }: { url: string; title: string; index: number; onClick: () => void }) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1, duration: 0.5 }}
+      whileHover={{ y: -8 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={onClick}
+      className="w-[260px] sm:w-[300px] flex-shrink-0 relative rounded-3xl overflow-hidden group cursor-pointer border border-white/5 bg-white/[0.01] hover:border-gold/30 transition-all duration-300 shadow-xl shadow-black/20"
+    >
+      {/* Video Container */}
+      <div className="relative aspect-[9/16] w-full bg-navy-deep/20 overflow-hidden">
+        <video
+          src={url}
+          autoPlay
+          muted
+          playsInline
+          loop
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+
+        {/* Hover/Play overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/20 to-transparent transition-opacity duration-300 opacity-60 group-hover:opacity-40" />
+
+        {/* Label & Title */}
+        <div className="absolute bottom-4 inset-x-4">
+          <span className="inline-block text-[9px] uppercase tracking-widest text-gold font-bold bg-navy-deep/80 px-2.5 py-1 rounded-md border border-gold/10 backdrop-blur-sm">
+            Activity Video
+          </span>
+          <h3 className="mt-2 text-sm font-display text-white font-bold leading-snug drop-shadow-md">
+            {title}
+          </h3>
+        </div>
+      </div>
+    </motion.div>
   );
 }
